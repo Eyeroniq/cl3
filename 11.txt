@@ -1,0 +1,28 @@
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+iris = load_iris()
+X = iris.data
+y = iris.target
+X.shape, y.shape
+
+X_train, X_test, y_train, y_test = train_test_split(X,y,stratify=y)
+
+class AISClassifier():
+    def __init__(self, n_neighbors):
+        self.knn = KNeighborsClassifier(n_neighbors=n_neighbors)
+        
+    def fit(self, X_train, y_train):
+        self.knn.fit(X_train, y_train)
+        
+    def predict(self, X_test):
+        return self.knn.predict(X_test)
+
+aisc = AISClassifier(n_neighbors=10)
+aisc.fit(X_train, y_train)
+
+y_preds = aisc.predict(X_test)
+
+accuracy_score(y_test, y_preds)

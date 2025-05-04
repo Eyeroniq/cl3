@@ -1,0 +1,41 @@
+import os
+import re
+
+os.listdir()
+
+def mapper(review1, review2):
+    review1, review2 = review1.strip(), review2.strip()
+    review1, review2 = review1.lower(), review2.lower()
+    review1, review2 = review1.split(), review2.split()
+    review1, review2 = set(review1), set(review2)
+    return review1, review2
+
+def reduce(review1, review2):
+    return review1.intersection(review2)
+
+def map_reduce(file1, file2):
+    with open(file1,"r") as file1, open(file2,"r") as file2:
+        review1 = file1.read()
+        review2 = file2.read()
+    
+    mapped1, mapped2 = mapper(review1,review2)
+    reduced = reduce(mapped1, mapped2)
+    result = ", ".join(reduced)
+    print(f"Common words in both the files: {result}")
+
+map_reduce("file1.txt", "file2.txt")
+
+********* create two file*********
+
+********* file1.txt *****************
+My name is Aryan
+I am in final year of engineering 
+My branch is AI&DS
+I am in division A
+
+
+********file2.txt*******************
+My name is Samuel
+I am in final year of engineering 
+Branch is CSE
+In division B

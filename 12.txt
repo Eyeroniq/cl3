@@ -1,0 +1,76 @@
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+from deap import base, creator, tools, algorithms
+
+# Clear any existing types
+if 'FitnessMin' in creator.__dict__:
+    del creator.FitnessMin
+if 'Individual' in creator.__dict__:
+    del creator.Individual
+
+# Setup optimization problem
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMin)
+
+toolbox = base.Toolbox()
+toolbox.register("attr_float", random.uniform, -5.0, 5.0)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_float, n=3)
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+
+# Evaluation function: sum of squares
+def eval_func(individual):
+    return sum(x ** 2 for x in individual),
+
+# Register genetic operators
+toolbox.register("evaluate", eval_func)
+toolbox.register("mate", tools.cxBlend, alpha=0.5)
+toolbox.register("mutate", tools.mutGaussian, mu=0, sigma=1, indpb=0.2)
+toolbox.register("select", tools.selTournament, tournsize=3)
+
+# Set random seed for reproducibility
+random.seed(42)
+
+# Setup statistics to track
+stats = tools.Statistics(lambda ind: ind.fitness.values)
+stats.register("min", np.min)
+stats.register("avg", np.mean)
+
+# Create population and run algorithm
+pop_size = 40
+n_generations = 15
+population = toolbox.population(n=pop_size)
+
+# Run GA with statistics tracking
+population, logbook = algorithms.eaSimple(
+    population, toolbox,
+    cxpb=0.7,    # Crossover probability
+    mutpb=0.2,   # Mutation probability
+    ngen=n_generations,
+    stats=stats,
+    verbose=True
+)
+
+# Get best solution
+best_ind = tools.selBest(population, k=1)[0]
+print(f"\nBest solution: {[round(x, 4) for x in best_ind]}")
+print(f"Best fitness: {round(best_ind.fitness.values[0], 6)}")
+
+# Extract data for plotting
+gen = logbook.select("gen")
+min_fit = logbook.select("min")
+avg_fit = logbook.select("avg")
+
+# Create visualization
+plt.figure(figsize=(10, 5))
+plt.plot(gen, min_fit, 'b-', label='Best Fitness')
+plt.plot(gen, avg_fit, 'r-', label='Average Fitness')
+plt.title('Genetic Algorithm Optimization')
+plt.xlabel('Generation')
+plt.ylabel('Fitness (Lower is Better)')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+
+# Save the figure
+plt.savefig('ga_optimization.png', dpi=300)

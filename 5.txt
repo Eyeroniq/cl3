@@ -1,0 +1,45 @@
+import os
+import re
+
+def char_mapper(review):
+    review = review.lower()
+    review = "".join(review.split())  # remove whitespace
+    return review
+
+def char_reducer(review):
+    char_count = {}
+    for char in review:
+        char_count[char] = review.count(char)
+    return char_count
+
+def word_mapper(review):
+    review = review.strip().lower()
+    review = re.findall(r"[a-z]+", review)
+    return review
+
+def word_reducer(review):
+    word_count = {}
+    for word in review:
+        word_count[word] = review.count(word)
+    return word_count
+
+def map_reduce(file_name):
+    with open(file_name, "r") as file:
+        review = file.read()
+
+    # Character Count
+    print("=== Character Count ===")
+    char_mapped = char_mapper(review)
+    char_reduced = char_reducer(char_mapped)
+    for char, count in char_reduced.items():
+        print(f"char: {char} -> count: {count}")
+
+    # Word Count
+    print("\n=== Word Count ===")
+    word_mapped = word_mapper(review)
+    word_reduced = word_reducer(word_mapped)
+    for word, count in word_reduced.items():
+        print(f"word: {word} -> count: {count}")
+
+# Run the combined MapReduce
+map_reduce("ssd.txt")

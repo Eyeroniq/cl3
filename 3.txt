@@ -1,0 +1,106 @@
+*************** CONCATCLIENT **************************
+import java.rmi.Naming;
+import java.util.Scanner;
+
+public class ConcatClient {
+    public static void main(String[] args) {
+        try {
+            // Lookup the remote object
+            ConcatInterface stub = (ConcatInterface) Naming.lookup("rmi://localhost/ConcatService");
+
+            // Get input from user
+            Scanner sc = new Scanner(System.in);
+            System.out.print("Enter first string: ");
+            String str1 = sc.nextLine();
+            System.out.print("Enter second string: ");
+            String str2 = sc.nextLine();
+
+            // Call the remote method
+            String result = stub.concatenate(str1, str2);
+
+            // Display the result
+            System.out.println("Concatenated Result: " + result);
+
+        } catch (Exception e) {
+            System.out.println("Client Error: " + e.getMessage());
+        }
+    }
+}
+
+
+********************CONCATIMPLEMENTATION ********************************
+import java.rmi.server.UnicastRemoteObject;
+import java.rmi.RemoteException;
+
+// This is the implementation of the remote interface
+public class ConcatImplementation extends UnicastRemoteObject implements ConcatInterface {
+
+    // Constructor must throw RemoteException
+    protected ConcatImplementation() throws RemoteException {
+        super();
+    }
+
+    // Implementation of the concatenate method
+    public String concatenate(String s1, String s2) throws RemoteException {
+        return s1 + s2;
+    }
+}
+
+*************************CONACTINTERFACE****************************************
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+
+// This interface defines the remote method
+public interface ConcatInterface extends Remote {
+    String concatenate(String s1, String s2) throws RemoteException;
+}
+
+*************************CONCATSERVER******************************************
+import java.rmi.Naming;
+
+public class ConcatServer {
+    public static void main(String[] args) {
+        try {
+            // Just bind the remote object; do NOT createRegistry here
+            ConcatImplementation obj = new ConcatImplementation();
+            Naming.rebind("ConcatService", obj);
+
+            System.out.println("Server is ready.");
+        } catch (Exception e) {
+            System.out.println("Server Error: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+}
+
+
+Python 
+***************************** CLIENT ****************************************
+import Pyro4
+
+uri = input("enter uri of server")
+concatenator = Pyro4.Proxy(uri)
+
+str1 = input("Enter string 1: ")
+str2 = input("Enter string 2: ")
+
+result = concatenator.concatenate(str1, str2)
+print(result)
+
+**************************** Server *******************************************
+import Pyro4
+@Pyro4.expose
+
+class stringconcatenator():
+    def concatenate(self, str1, str2):
+        return str1+str2
+
+daemon = Pyro4.Daemon()
+uri = daemon.register(stringconcatenator)
+print(uri)
+daemon.requestLoop()
+
+
+
+
+

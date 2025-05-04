@@ -1,0 +1,26 @@
+*********** CLIENT ******************************
+
+from xmlrpc import client
+
+def main():
+    server = client.ServerProxy("http://localhost:8000")
+    n = int(input("Enter number : "))
+    result = server.calculate_factorial(n)
+    print(f"Factorial of {n} : {result}")
+    
+if __name__=="__main__":
+    main()
+
+
+*****************SERVER*************************
+from xmlrpc.server import SimpleXMLRPCServer
+
+def factorial(n):
+	if n==0 or n==1:
+		return 1
+	else:
+		return n*(factorial(n-1))
+
+server = SimpleXMLRPCServer(("localhost",8000))
+server.register_function(factorial,"calculate_factorial")
+server.serve_forever()
